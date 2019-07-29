@@ -92,24 +92,27 @@ export default {
     this.currentOcrRecognizeListObj = this.deepClone(this.ocrRecognizeListObj)
   },
   computed: {
+    currentOcrRecognizeRecordId () {
+      return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.currentOcrRecognizeRecordId
+    },
     currentPicIndex () {
-      return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex
+      return this.currentOcrRecognizeRecords && this.currentOcrRecognizeRecordId && this.currentOcrRecognizeRecords.findIndex(recognizeRecord => recognizeRecord.ocrRecognizeRecordId === this.currentOcrRecognizeRecordId)
     },
     picTotal () {
-      return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.total
+      return this.currentOcrRecognizeRecords && this.currentOcrRecognizeRecords.length
     },
     currentOcrRecognizeRecords () {
-      return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.records
+      const records = this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.records
+      return records && records.filter(recognizeRecord => this.isValid(recognizeRecord))
     },
     currentImages () {
-      return this.currentOcrRecognizeListObj && [this.currentOcrRecognizeListObj.records[this.currentPicIndex]]
+      return (this.currentOcrRecognizeRecords && [this.currentOcrRecognizeRecords[this.currentPicIndex]]) || []
     }
   },
   mounted () {
-    console.log('this.ocrRecognizeListObj515', this.ocrRecognizeListObj)
+    console.log('this.ocrRecognizeListObj515', this.ocrRecognizeListObj, this.currentOcrRecognizeRecords)
   },
   methods: {
-
     isUploadWaiting (recognizeRecord) {
       return !!recognizeRecord.isUploadWaiting
     },
@@ -120,7 +123,7 @@ export default {
       return recognizeRecord.bizStatus === 1 && recognizeRecord.recognizeStatus === 1
     },
     isValid (recognizeRecord) {
-      return !this.isUploadWaiting && !this.isDeleted && !this.isRecognizingWait
+      return !this.isUploadWaiting(recognizeRecord) && !this.isDeleted(recognizeRecord) && !this.isRecognizingWait(recognizeRecord)
     },
     handleRecognizeDelete () {
       this.$emit('onFullPreviewDelete', this.currentOcrRecognizeRecords[this.currentPicIndex])
@@ -130,14 +133,14 @@ export default {
     },
     handlePreviousClick () {
       // this.currentViewer && this.currentViewer.prev()
-      const nextIndex = this.currentPicIndex === 0 ? 3 : Math.abs(this.currentPicIndex - 1) % this.picTotal
-      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex = nextIndex
+      const nextIndex = this.currentPicIndex === 0 ? (this.picTotal - 1) : Math.abs(this.currentPicIndex - 1) % this.picTotal
+      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordId = this.currentOcrRecognizeRecords[nextIndex].ocrRecognizeRecordId
       this.$emit('ocrRecognizeListObjChange', this.deepClone(this.currentOcrRecognizeListObj))
     },
     handleNextClick () {
       // this.currentViewer && this.currentViewer.next()
       const nextIndex = (this.currentPicIndex + 1) % this.picTotal
-      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex = nextIndex
+      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordId = this.currentOcrRecognizeRecords[nextIndex].ocrRecognizeRecordId
       this.$emit('ocrRecognizeListObjChange', this.deepClone(this.currentOcrRecognizeListObj))
     },
     handleRotateClick (value) { // 旋转

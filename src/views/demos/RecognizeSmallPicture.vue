@@ -1,6 +1,6 @@
 <template>
   <div class="imageContainer">
-    <div class="closeBtnContainer">
+    <div class="closeBtnContainer" v-show="!isMadeOrder">
       <img src="@/assets/ocr/closeBlue.png" @click="handleCloseBtnClick" class="closeBtn">
     </div>
     <div @click="handlePicClick">

@@ -38,8 +38,9 @@ export default {
       console.log('getOcrRecognizeList> res515', res, res.data.data)
       this.ocrRecognizeListObj = res.data && res.data.data
       if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
-        this.ocrRecognizeListObj.currentOcrRecognizeRecordIndex = 0
-        this.currentOcrRecognizeRecordId = this.ocrRecognizeListObj.records[0].ocrRecognizeRecordId
+        const ocrRecognizeRecordId = this.ocrRecognizeListObj.records[0].ocrRecognizeRecordId
+        this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecordId
+        this.currentOcrRecognizeRecordId = ocrRecognizeRecordId
       }
     })
   },
@@ -49,7 +50,7 @@ export default {
       return this.ocrRecognizeListObj && this.ocrRecognizeListObj.records
     },
     getCurrentOcrRecognizeRecordId () {
-      return this.ocrRecognizeRecords && this.ocrRecognizeRecords[this.ocrRecognizeListObj.currentOcrRecognizeRecordIndex].ocrRecognizeRecordId
+      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.currentOcrRecognizeRecordId
     }
   },
   methods: {
@@ -66,9 +67,9 @@ export default {
       this.isShowPreview = false
     },
     handleShowPreview (ocrRecognizeRecord) {
-      const ocrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.ocrRecognizeListObj.currentOcrRecognizeRecordIndex = this.ocrRecognizeListObj.records.findIndex(rec => rec.ocrRecognizeRecordId === ocrRecognizeRecordId)
-      this.currentOcrRecognizeRecordId = ocrRecognizeRecordId
+      console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
+      this.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
+      this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
       this.isShowPreview = true
     }
   }
