@@ -31,18 +31,16 @@ export default {
         'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3597323878,2962972725&fm=26&gp=0.jpg'
       ],
       swiperOption: {
-        zoom: true,
-        initialSlide: 0,
-        pagination: {
-          el: '.swiper-pagination',
-          type: 'fraction'
-        },
-        // scrollbar: {
-        //   el: '.swiper-scrollbar'
-        // },
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev'
+        },
+        slidesPerView: 3,
+        slidesPerColumn: 2,
+        spaceBetween: 30,
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true
         }
       }
     }

@@ -9,7 +9,12 @@ import 'iview/dist/styles/iview.css'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 // require styles
 import 'swiper/dist/css/swiper.css' // 使用 CSS
+/* 引入资源请求插件 */
+import VueResource from 'vue-resource'
 import App from './App.vue'
+
+/* 使用VueResource插件 */
+Vue.use(VueResource)
 Vue.use(iView)
 
 Vue.use(ElementUI)

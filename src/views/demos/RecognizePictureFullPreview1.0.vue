@@ -1,29 +1,29 @@
 <template>
   <div>
-    <el-row class="zeroPaddingMargin">
+    <el-row v-show="isShowPreview" class="zeroPaddingMargin">
       <el-col :span="23">
         <div class="grid-content bg-purple">
-          <viewer ref="viewer" @inited="inited" :images="currentImages" style="height: 450px;">
-            <div v-for="item in currentImages" :key="item.ocrRecognizeRecordId">
+          <viewer ref="viewer" @inited="inited" :images="currentOcrRecognizeRecords" style="height: 450px;">
+            <div v-for="item in currentOcrRecognizeRecords" :key="item.ocrRecognizeRecordId">
               <img :src="item.picUrl" height="100">
             </div>
           </viewer>
           <el-row class="deleteRow">
             <el-col :span="12" class="leftCol">
               <div class="operationSection">
-                <span @click="handleRecognizeDelete"><img src="@assets/ocr/delete.png" ></span>
+                <span @click="handleClosePreview"><img src="@assets/ocr/delete.png" ></span>
               </div>
             </el-col>
             <el-col :span="12" class="rightCol">
               <div class="operationSection numberSection">
-                {{currentPicIndex + 1}}/{{picTotal}}
+                {{currentPicIndex}}/{{picTotal}}
               </div>
             </el-col>
           </el-row>
         </div>
       </el-col>
       <el-col :span="1" class="zeroPaddingMargin leftOffset">
-        <el-row class="closeBtnForFullPreview">
+        <el-row class="closeBtn">
           <el-col :span="24">
             <span @click="handleClosePreview"><img  src="@assets/ocr/closeGray.png" ></span>
           </el-col>
@@ -49,6 +49,9 @@
         </el-row>
       </el-col>
     </el-row>
+    <div v-show="!isShowPreview">
+      <img @click="handleShowPreview" v-for="item in currentOcrRecognizeRecords" :src="item.picUrl" :key="item.ocrRecognizeRecordId" height="100">
+    </div>
   </div>
 </template>
 
@@ -76,7 +79,8 @@ export default {
         scaleX: 1,
         scaleY: 1
       },
-      currentViewer: null
+      currentViewer: null,
+      isShowPreview: true
     }
   },
   watch: {
@@ -93,67 +97,44 @@ export default {
   },
   computed: {
     currentPicIndex () {
-      return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex
+      return this.currentOcrRecognizeListObj && (this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex + 1)
     },
     picTotal () {
       return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.total
     },
     currentOcrRecognizeRecords () {
       return this.currentOcrRecognizeListObj && this.currentOcrRecognizeListObj.records
-    },
-    currentImages () {
-      return this.currentOcrRecognizeListObj && [this.currentOcrRecognizeListObj.records[this.currentPicIndex]]
     }
   },
-  mounted () {
-    console.log('this.ocrRecognizeListObj515', this.ocrRecognizeListObj)
-  },
+  mounted () {},
   methods: {
-
-    isUploadWaiting (recognizeRecord) {
-      return !!recognizeRecord.isUploadWaiting
-    },
-    isDeleted (recognizeRecord) {
-      return recognizeRecord.bizStatus === 3
-    },
-    isRecognizingWait (recognizeRecord) {
-      return recognizeRecord.bizStatus === 1 && recognizeRecord.recognizeStatus === 1
-    },
-    isValid (recognizeRecord) {
-      return !this.isUploadWaiting && !this.isDeleted && !this.isRecognizingWait
-    },
-    handleRecognizeDelete () {
-      this.$emit('onFullPreviewDelete', this.currentOcrRecognizeRecords[this.currentPicIndex])
-    },
     deepClone (obj) {
       return JSON.parse(JSON.stringify(obj))
     },
     handlePreviousClick () {
-      // this.currentViewer && this.currentViewer.prev()
-      const nextIndex = this.currentPicIndex === 0 ? 3 : Math.abs(this.currentPicIndex - 1) % this.picTotal
-      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex = nextIndex
-      this.$emit('ocrRecognizeListObjChange', this.deepClone(this.currentOcrRecognizeListObj))
+      this.currentViewer && this.currentViewer.prev()
     },
     handleNextClick () {
-      // this.currentViewer && this.currentViewer.next()
-      const nextIndex = (this.currentPicIndex + 1) % this.picTotal
-      this.currentOcrRecognizeListObj.currentOcrRecognizeRecordIndex = nextIndex
-      this.$emit('ocrRecognizeListObjChange', this.deepClone(this.currentOcrRecognizeListObj))
+      this.currentViewer && this.currentViewer.next()
     },
-    handleRotateClick (value) { // 旋转
+    handleRotateClick (value) {
       this.currentViewer && this.currentViewer.rotate(value || this.form.rotate)
     },
-    handleZoomInClick (value) { // 放大
+    handleZoomInClick (value) {
       this.currentViewer && this.currentViewer.zoom(value || this.form.zoom)
     },
-    handleZoomOutClick (value) { // 缩小
+    handleZoomOutClick (value) {
       this.currentViewer && this.currentViewer.zoom(value || this.form.zoom)
     },
     inited (viewer) {
       this.currentViewer = viewer
     },
     handleClosePreview () {
-      this.$emit('onClosePreview')
+      this.isShowPreview = false
+      // this.currentViewer && this.currentViewer.reset()
+    },
+    handleShowPreview () {
+      this.isShowPreview = true
     }
   }
 }
@@ -167,16 +148,15 @@ export default {
       margin-left: -40px;
     }
   }
-  .closeBtnForFullPreview {
+  .closeBtn {
     height: 100%;
     margin-top: 10px;
     margin-left: -20px;
     z-index: 10000;
     position: relative;
-    cursor: pointer;
   }
   .operationSection {
-    @extend .closeBtnForFullPreview; // margin-top: 50px;
+    @extend .closeBtn; // margin-top: 50px;
     &+.operationSection {
       margin-top: 10px;
     }
@@ -202,6 +182,5 @@ export default {
     float: right;
     text-align: center;
     margin-top: 15px;
-    cursor: auto;
   }
 </style>

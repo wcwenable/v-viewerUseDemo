@@ -13,5 +13,19 @@ module.exports = {
       .set('@views', resolve('src/views'))
       .set('@tools', resolve('src/tools'))
   },
-  runtimeCompiler: true
+  runtimeCompiler: true,
+  devServer: {
+    port: 8885,
+    proxy: {
+      '/api': {
+        // target: 'http://tms-dev.dj.com',
+        target: 'https://www.easy-mock.com/mock/5d3a603a47bd1943d2334eef/waybill',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/'
+        }
+      }
+    }
+  }
 }
