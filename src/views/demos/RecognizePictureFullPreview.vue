@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="fullPreviewContainer">
     <el-row class="zeroPaddingMargin">
       <el-col :span="23">
         <div class="grid-content bg-purple">
@@ -10,11 +10,11 @@
           </viewer>
           <el-row class="deleteRow">
             <el-col :span="12" class="leftCol">
-              <div class="operationSection">
+              <div class="operationSection" v-show="!isMadeOrder(currentOcrRecognizeRecords[currentPicIndex])">
                 <span @click="handleRecognizeDelete"><img src="@assets/ocr/delete.png" ></span>
               </div>
             </el-col>
-            <el-col :span="12" class="rightCol">
+            <el-col :span="numSpan" class="rightCol">
               <div class="operationSection numberSection">
                 {{currentPicIndex + 1}}/{{picTotal}}
               </div>
@@ -107,6 +107,9 @@ export default {
     },
     currentImages () {
       return (this.currentOcrRecognizeRecords && [this.currentOcrRecognizeRecords[this.currentPicIndex]]) || []
+    },
+    numSpan () {
+      return this.isMadeOrder(this.currentOcrRecognizeRecords[this.currentPicIndex]) ? 24 : 12
     }
   },
   mounted () {
@@ -121,6 +124,9 @@ export default {
     },
     isRecognizingWait (recognizeRecord) {
       return recognizeRecord.bizStatus === 1 && recognizeRecord.recognizeStatus === 1
+    },
+    isMadeOrder (recognizeRecord) {
+      return recognizeRecord.bizStatus === 2
     },
     isValid (recognizeRecord) {
       return !this.isUploadWaiting(recognizeRecord) && !this.isDeleted(recognizeRecord) && !this.isRecognizingWait(recognizeRecord)
@@ -163,6 +169,10 @@ export default {
 </script>
 
 <style lang="scss">
+.fullPreviewContainer {
+  height: 100%;
+  width: 100%;
+}
   .zeroPaddingMargin {
     padding: 0;
     margin: 0;
@@ -185,12 +195,13 @@ export default {
     }
   }
   .otherBtn {
-    padding-top: 200px;
+    padding-top: 268px;
     height: 100%;
   }
   .deleteRow {
     text-align: right;
     padding-bottom: 10px;
+    margin-top: 105px;
     & .rightCol {
       padding-right: 20px;
       padding-bottom: 8px;

@@ -3,11 +3,7 @@
     <el-row>
       <el-col :span="12">
         <div class="grid-content bg-purple">
-          <div v-if="isShowPreview">
-            <recognize-picture-full-preview @onClosePreview="handleClosePreview" ref="recognizePictureFullPreview" @ocrRecognizeListObjChange="handleOcrRecognizeListObjChange" @onFullPreviewDelete="handleRecognizeRecordDelete" :ocrRecognizeListObj='ocrRecognizeListObj'>
-            </recognize-picture-full-preview>
-          </div>
-          <div v-else class="bswrapperContainer">
+          <div class="bswrapperContainer">
             <div ref="bsWrapper" class="bswrapper">
               <div class="pulldown-scroller pullup-scroller">
                 <div class="pulldown-wrapper">
@@ -21,10 +17,11 @@
                     <div v-show="!isPullingDown"><span>刷新成功</span></div>
                   </div>
                 </div>
-                <div class="data-list">
-                  <recognize-small-picture class="data-list-item" :currentOcrRecognizeRecordId="currentOcrRecognizeRecordId" v-for="item in ocrRecognizeRecords" :recognizeRecord="item" @onSmallPictureDelete="handleRecognizeRecordDelete" @onSmallPictureClick="handleShowPreview"
-                    :key="item.ocrRecognizeRecordId"></recognize-small-picture>
-                </div>
+                <ul class="data-list">
+                  <li v-for="(picInfo, index) in dataList" :key="index" class="data-list-item">
+                    <img :src="picInfo && picInfo.picUrl" height="100px">
+                  </li>
+                </ul>
                 <div class="pullup-wrapper">
                   <div v-show="beforePullUp">
                     <span>上拉加载更多</span>
@@ -51,8 +48,6 @@
 </template>
 
 <script>
-import RecognizePictureFullPreview from '@/views/demos/RecognizePictureFullPreview'
-import RecognizeSmallPicture from '@/views/demos/RecognizeSmallPicture'
 import BScroll from '@better-scroll/core'
 import PullDown from '@better-scroll/pull-down'
 import ScrollBar from '@better-scroll/scroll-bar'
@@ -67,10 +62,6 @@ const TIME_STOP = 600
 const THRESHOLD = 0
 const STOP = 56
 export default {
-  components: {
-    RecognizePictureFullPreview,
-    RecognizeSmallPicture
-  },
   data () {
     return {
       isPullUpLoad: false,
@@ -78,9 +69,7 @@ export default {
       beforePullUp: true,
       isPullingDown: false,
       ocrRecognizeListObj: null,
-      dataList: [],
-      isShowPreview: false,
-      currentOcrRecognizeRecordId: null
+      dataList: []
     }
   },
   created () {
@@ -90,36 +79,10 @@ export default {
   mounted () {
     this.initBscroll()
   },
-  computed: {
-    ocrRecognizeRecords () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.records
-    },
-    getCurrentOcrRecognizeRecordId () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.currentOcrRecognizeRecordId
-    }
-  },
   methods: {
-    handleRecognizeRecordDelete (recognizeRecord) {
-      console.log('handleRecognizeRecordDelete (recognizeRecord515', recognizeRecord)
-      this.$message.warning('删除图片识别记录here!')
-    },
-    handleOcrRecognizeListObjChange (newVal) {
-      console.log('handleOcrRecognizeListObjChange (newVal515', newVal)
-      this.ocrRecognizeListObj = newVal && this.$refs.recognizePictureFullPreview.deepClone(newVal)
-      this.currentOcrRecognizeRecordId = this.getCurrentOcrRecognizeRecordId
-    },
-    handleClosePreview () {
-      this.isShowPreview = false
-    },
-    handleShowPreview (ocrRecognizeRecord) {
-      console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
-      this.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.isShowPreview = true
-    },
     /*
-                    mode: 0(下拉刷新)，1（上拉加载）
-                  */
+          mode: 0(下拉刷新)，1（上拉加载）
+        */
     refreshDataList (mode = 1) {
       return this.$http.post('/api/getOcrRecognizeList').then(res => {
         mode === 0 && (this.dataList = [])
@@ -201,13 +164,8 @@ export default {
 </script>
 
 <style lang="scss">
-
-  .viewer-container {
-    height: 600px !important;
-  }
-
   .bswrapperContainer {
-    height: 600px; // height: 100%;
+    height: 450px; // height: 100%;
   }
   .bswrapper {
     position: relative;
@@ -218,12 +176,13 @@ export default {
   }
   .data-list {
     padding: 0;
-    min-height: 650px;
+    min-height: 500px;
     height: 100%;
   }
   .data-list-item {
     padding: 10px 0;
-    list-style: none; // border-bottom: 1px solid #ccc;
+    list-style: none;
+    border-bottom: 1px solid #ccc;
   }
   .pulldown-wrapper {
     position: absolute;
@@ -234,10 +193,15 @@ export default {
     text-align: center;
     color: #999;
   }
+  .pullup-bswrapper {
+    height: 100%;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    overflow: hidden;
+  }
   .pullup-wrapper {
     padding: 20px;
     text-align: center;
     color: #999;
-    overflow: hidden;
   }
 </style>
