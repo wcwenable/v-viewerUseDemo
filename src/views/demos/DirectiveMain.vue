@@ -2,79 +2,54 @@
   <div>
     <el-row>
       <el-col :span="12">
-        <div v-if="isShowPreview">
-          <recognize-picture-full-preview @onClosePreview="handleClosePreview" ref="recognizePictureFullPreview" @ocrRecognizeListObjChange="handleOcrRecognizeListObjChange" @onFullPreviewDelete="handleRecognizeRecordDelete" :ocrRecognizeListObj='ocrRecognizeListObj'>
-          </recognize-picture-full-preview>
-        </div>
-        <div v-if="!isShowPreview">
-          <recognize-small-picture :currentOcrRecognizeRecordId="currentOcrRecognizeRecordId" v-for="item in ocrRecognizeRecords" :recognizeRecord="item" @onSmallPictureDelete="handleRecognizeRecordDelete" @onSmallPictureClick="handleShowPreview" :key="item.ocrRecognizeRecordId"></recognize-small-picture>
-        </div>
+        <el-upload v-show="!isNeedHideUpload" accept="image/png, image/jpeg" drag action="" :limit="MAXFILESNUM" :on-exceed="handleOnExceed" :show-file-list="false" multiple>
+          <img src="@/assets/ocr/upload@2x.png">
+          <div class="el-upload__text uploadDesc">您可以拖拽上传也可以选择<em>本地文件</em><br>支持JPG/PNG格式，大小4M以内</div>
+          <div class="el-upload__tip" slot="tip"></div>
+        </el-upload>
+        <recognize-situation-list @onToggleFullPreview="handleToggleFullPreview" ref="recognizeSituationList"></recognize-situation-list>
       </el-col>
       <el-col :span="12">
-        <div class="grid-content bg-purple-light">23434</div>
+        <div class="grid-content bg-purple-light">4324234</div>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import RecognizePictureFullPreview from '@/views/demos/RecognizePictureFullPreview'
-import RecognizeSmallPicture from '@/views/demos/RecognizeSmallPicture'
+import RecognizeSituationList from '@/views/demos/RecognizeSituationList'
 export default {
-  name: 'carrousel',
   components: {
-    RecognizePictureFullPreview,
-    RecognizeSmallPicture
+    RecognizeSituationList
   },
   data () {
     return {
-      ocrRecognizeListObj: null,
-      isShowPreview: false,
-      currentOcrRecognizeRecordId: null
+      MAXFILESNUM: 20,
+      isNeedHideUpload: false
     }
   },
-  created () {
-    this.$http.post('/api/getOcrRecognizeList').then(res => {
-      console.log('getOcrRecognizeList> res515', res, res.data.data)
-      this.ocrRecognizeListObj = res.data && res.data.data
-      if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
-        const ocrRecognizeRecordId = this.ocrRecognizeListObj.records[0].ocrRecognizeRecordId
-        this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecordId
-        this.currentOcrRecognizeRecordId = ocrRecognizeRecordId
-      }
-    })
-  },
+  created () {},
   mounted () {},
-  computed: {
-    ocrRecognizeRecords () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.records
-    },
-    getCurrentOcrRecognizeRecordId () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.currentOcrRecognizeRecordId
-    }
-  },
+  computed: {},
   methods: {
-    handleRecognizeRecordDelete (recognizeRecord) {
-      console.log('handleRecognizeRecordDelete (recognizeRecord515', recognizeRecord)
-      this.$message.warning('删除图片识别记录here!')
+    handleToggleFullPreview (newVal) {
+      this.isNeedHideUpload = newVal
     },
-    handleOcrRecognizeListObjChange (newVal) {
-      console.log('handleOcrRecognizeListObjChange (newVal515', newVal)
-      this.ocrRecognizeListObj = newVal && this.$refs.recognizePictureFullPreview.deepClone(newVal)
-      this.currentOcrRecognizeRecordId = this.getCurrentOcrRecognizeRecordId
-    },
-    handleClosePreview () {
-      this.isShowPreview = false
-    },
-    handleShowPreview (ocrRecognizeRecord) {
-      console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
-      this.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.isShowPreview = true
+    handleOnExceed (files, fileList) {
+      console.log('handleOnExceed (files, fileList515', files, fileList)
+      this.$message.warning(`您选择了${files.length}张图片，超过了单次上传限制(${this.MAXFILESNUM}张)！`)
     }
   }
 }
 </script>
 
 <style lang="scss">
+  .uploadDesc {
+    margin-top: 20px;
+  }
+  .el-upload-dragger {
+    padding: 20px 0;
+    height: auto;
+    width: 500px;
+  }
 </style>

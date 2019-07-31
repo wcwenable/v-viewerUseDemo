@@ -34,11 +34,9 @@ export default {
   },
   components: {},
   data () {
-    return {
-    }
+    return {}
   },
-  watch: {
-  },
+  watch: {},
   created () {},
   mounted () {},
   computed: {
@@ -63,7 +61,7 @@ export default {
     imageContainee () {
       return {
         'imageContainee': true,
-        'current': this.currentOcrRecognizeRecordId === this.recognizeRecord.ocrRecognizeRecordId
+        'imageContainee current': this.currentOcrRecognizeRecordId === this.recognizeRecord.ocrRecognizeRecordId
       }
     }
   },
@@ -91,7 +89,7 @@ export default {
     border-radius: 5px;
     width: 125px;
     height: 165px;
-    box-sizing: content-box;
+    // box-sizing: content-box;
   }
   .imageContainer {
     width: 125px;

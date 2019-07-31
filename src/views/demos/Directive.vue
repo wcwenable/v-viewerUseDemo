@@ -2,46 +2,12 @@
   <div>
     <el-row>
       <el-col :span="12">
-        <div class="grid-content bg-purple">
-          <div v-if="isShowPreview">
-            <recognize-picture-full-preview @onClosePreview="handleClosePreview" ref="recognizePictureFullPreview" @ocrRecognizeListObjChange="handleOcrRecognizeListObjChange" @onFullPreviewDelete="handleRecognizeRecordDelete" :ocrRecognizeListObj='ocrRecognizeListObj'>
-            </recognize-picture-full-preview>
-          </div>
-          <div v-else class="bswrapperContainer">
-            <div ref="bsWrapper" class="bswrapper">
-              <div class="pulldown-scroller pullup-scroller">
-                <div class="pulldown-wrapper">
-                  <div v-show="beforePullDown">
-                    <span>下拉刷新</span>
-                  </div>
-                  <div v-show="!beforePullDown">
-                    <div v-show="isPullingDown">
-                      <span>刷新中...</span>
-                    </div>
-                    <div v-show="!isPullingDown"><span>刷新成功</span></div>
-                  </div>
-                </div>
-                <div class="data-list">
-                  <recognize-small-picture class="data-list-item" :currentOcrRecognizeRecordId="currentOcrRecognizeRecordId" v-for="item in ocrRecognizeRecords" :recognizeRecord="item" @onSmallPictureDelete="handleRecognizeRecordDelete" @onSmallPictureClick="handleShowPreview"
-                    :key="item.ocrRecognizeRecordId"></recognize-small-picture>
-                </div>
-                <div class="pullup-wrapper">
-                  <div v-show="beforePullUp">
-                    <span>上拉加载更多</span>
-                  </div>
-                  <div v-show="!beforePullUp">
-                    <div v-if="!isPullUpLoad" class="before-trigger">
-                      <span class="">加载成功</span>
-                    </div>
-                    <div v-else class="after-trigger">
-                      <span class="">加载中...</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <el-upload v-show="!isNeedHideUpload" accept="image/png, image/jpeg" drag action="" :limit="MAXFILESNUM" :on-exceed="handleOnExceed" :show-file-list="false" multiple>
+          <img src="@/assets/ocr/upload@2x.png">
+          <div class="el-upload__text uploadDesc">您可以拖拽上传也可以选择<em>本地文件</em><br>支持JPG/PNG格式，大小4M以内</div>
+          <div class="el-upload__tip" slot="tip"></div>
+        </el-upload>
+        <recognize-situation-list @onToggleFullPreview="handleToggleFullPreview" ref="recognizeSituationList"></recognize-situation-list>
       </el-col>
       <el-col :span="12">
         <div class="grid-content bg-purple-light">4324234</div>
@@ -51,193 +17,39 @@
 </template>
 
 <script>
-import RecognizePictureFullPreview from '@/views/demos/RecognizePictureFullPreview'
-import RecognizeSmallPicture from '@/views/demos/RecognizeSmallPicture'
-import BScroll from '@better-scroll/core'
-import PullDown from '@better-scroll/pull-down'
-import ScrollBar from '@better-scroll/scroll-bar'
-import MouseWheel from '@better-scroll/mouse-wheel'
-import Pullup from '@better-scroll/pull-up'
-BScroll.use(Pullup)
-BScroll.use(MouseWheel)
-BScroll.use(ScrollBar)
-BScroll.use(PullDown)
-const TIME_BOUNCE = 800
-const TIME_STOP = 600
-const THRESHOLD = 0
-const STOP = 56
+import RecognizeSituationList from '@/views/demos/RecognizeSituationList'
 export default {
   components: {
-    RecognizePictureFullPreview,
-    RecognizeSmallPicture
+    RecognizeSituationList
   },
   data () {
     return {
-      isPullUpLoad: false,
-      beforePullDown: true,
-      beforePullUp: true,
-      isPullingDown: false,
-      ocrRecognizeListObj: null,
-      dataList: [],
-      isShowPreview: false,
-      currentOcrRecognizeRecordId: null
+      MAXFILESNUM: 20,
+      isNeedHideUpload: false
     }
   },
-  created () {
-    this.bscroll = null
-    this.refreshDataList(0)
-  },
-  mounted () {
-    this.initBscroll()
-  },
-  computed: {
-    ocrRecognizeRecords () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.records
-    },
-    getCurrentOcrRecognizeRecordId () {
-      return this.ocrRecognizeListObj && this.ocrRecognizeListObj.currentOcrRecognizeRecordId
-    }
-  },
+  created () {},
+  mounted () {},
+  computed: {},
   methods: {
-    handleRecognizeRecordDelete (recognizeRecord) {
-      console.log('handleRecognizeRecordDelete (recognizeRecord515', recognizeRecord)
-      this.$message.warning('删除图片识别记录here!')
+    handleToggleFullPreview (newVal) {
+      this.isNeedHideUpload = newVal
     },
-    handleOcrRecognizeListObjChange (newVal) {
-      console.log('handleOcrRecognizeListObjChange (newVal515', newVal)
-      this.ocrRecognizeListObj = newVal && this.$refs.recognizePictureFullPreview.deepClone(newVal)
-      this.currentOcrRecognizeRecordId = this.getCurrentOcrRecognizeRecordId
-    },
-    handleClosePreview () {
-      this.isShowPreview = false
-    },
-    handleShowPreview (ocrRecognizeRecord) {
-      console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
-      this.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.isShowPreview = true
-    },
-    /*
-                    mode: 0(下拉刷新)，1（上拉加载）
-                  */
-    refreshDataList (mode = 1) {
-      return this.$http.post('/api/getOcrRecognizeList').then(res => {
-        mode === 0 && (this.dataList = [])
-        console.log('getOcrRecognizeList> res515', res, res.data.data)
-        this.ocrRecognizeListObj = res.data && res.data.data
-        if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
-          this.dataList = this.dataList.concat(this.ocrRecognizeListObj.records)
-        }
-      })
-    },
-    initBscroll () {
-      this.bscroll = new BScroll(this.$refs.bsWrapper, {
-        scrollY: true,
-        bounceTime: TIME_BOUNCE,
-        pullDownRefresh: {
-          threshold: THRESHOLD,
-          stop: STOP
-        },
-        pullUpLoad: {
-          threshold: -100
-        },
-        mouseWheel: {
-          speed: 20,
-          invert: false,
-          easeTime: 300
-        },
-        scrollbar: true
-      })
-      this.bscroll.on('pullingUp', this.pullingUpHandler)
-      this.bscroll.on('pullingDown', this.pullingDownHandler)
-      this.bscroll.on('scroll', this.scrollHandler)
-    },
-    scrollHandler (pos) {
-      console.log(pos.y)
-    },
-    async pullingUpHandler () {
-      this.beforePullUp = false
-      this.isPullUpLoad = true
-      await this.refreshDataList(1)
-      this.finishPullUp()
-      this.bscroll.refresh()
-      this.isPullUpLoad = false
-    },
-    async finishPullUp () {
-      const stopTime = TIME_STOP
-      await new Promise(resolve => {
-        setTimeout(() => {
-          this.bscroll.finishPullUp()
-          resolve()
-        }, stopTime)
-      })
-      setTimeout(() => {
-        this.beforePullUp = true
-        this.bscroll.refresh()
-      }, TIME_BOUNCE)
-    },
-    async pullingDownHandler () {
-      this.beforePullDown = false
-      this.isPullingDown = true
-      await this.refreshDataList(0)
-      this.isPullingDown = false
-      this.finishPullDown()
-    },
-    async finishPullDown () {
-      const stopTime = TIME_STOP
-      await new Promise(resolve => {
-        setTimeout(() => {
-          this.bscroll.finishPullDown()
-          resolve()
-        }, stopTime)
-      })
-      setTimeout(() => {
-        this.beforePullDown = true
-        this.bscroll.refresh()
-      }, TIME_BOUNCE)
+    handleOnExceed (files, fileList) {
+      console.log('handleOnExceed (files, fileList515', files, fileList)
+      this.$message.warning(`您选择了${files.length}张图片，超过了单次上传限制(${this.MAXFILESNUM}张)！`)
     }
   }
 }
 </script>
 
 <style lang="scss">
-
-  .viewer-container {
-    height: 600px !important;
+  .uploadDesc {
+    margin-top: 20px;
   }
-
-  .bswrapperContainer {
-    height: 600px; // height: 100%;
-  }
-  .bswrapper {
-    position: relative;
-    height: 100%;
-    padding: 0 10px;
-    border: 1px solid #ccc;
-    overflow: hidden;
-  }
-  .data-list {
-    padding: 0;
-    min-height: 650px;
-    height: 100%;
-  }
-  .data-list-item {
-    padding: 10px 0;
-    list-style: none; // border-bottom: 1px solid #ccc;
-  }
-  .pulldown-wrapper {
-    position: absolute;
-    width: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    transform: translateY(-100%) translateZ(0);
-    text-align: center;
-    color: #999;
-  }
-  .pullup-wrapper {
-    padding: 20px;
-    text-align: center;
-    color: #999;
-    overflow: hidden;
+  .el-upload-dragger {
+    padding: 20px 0;
+    height: auto;
+    width: 500px;
   }
 </style>
