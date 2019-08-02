@@ -86,7 +86,7 @@ export default {
     refreshDataList (mode = 1) {
       return this.$http.post('/api/getOcrRecognizeList').then(res => {
         mode === 0 && (this.dataList = [])
-        console.log('getOcrRecognizeList> res515', res, res.data.data)
+        // console.log('getOcrRecognizeList> res515', res, res.data.data)
         this.ocrRecognizeListObj = res.data && res.data.data
         if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
           this.dataList = this.dataList.concat(this.ocrRecognizeListObj.records)
@@ -116,7 +116,7 @@ export default {
       this.bscroll.on('scroll', this.scrollHandler)
     },
     scrollHandler (pos) {
-      console.log(pos.y)
+      // console.log(pos.y)
     },
     async pullingUpHandler () {
       this.beforePullUp = false

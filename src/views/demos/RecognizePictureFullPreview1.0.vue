@@ -87,7 +87,7 @@ export default {
     ocrRecognizeListObj: {
       deep: true,
       handler: function (newVal) {
-        console.log('ocrRecognizeListObj515', newVal)
+        // console.log('ocrRecognizeListObj515', newVal)
         this.currentOcrRecognizeListObj = newVal && this.deepClone(newVal)
       }
     }

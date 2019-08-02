@@ -209,7 +209,7 @@ export default {
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
     },
     clickItem (e, item) {
-      console.log(e)
+      // console.log(e)
       this.$emit('click', item)
     },
     destroy () {

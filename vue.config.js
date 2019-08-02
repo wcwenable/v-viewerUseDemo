@@ -16,7 +16,25 @@ module.exports = {
   runtimeCompiler: true,
   devServer: {
     port: 8885,
-    proxy: {
+    proxy: {      
+      '/api/authcenter': {
+        // target: 'http://tms-dev.dj.com',
+        target: 'http://tms-uat.dj.com/api',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api/authcenter': '/authcenter'
+        }
+      },      
+      '/api/common': {
+        // target: 'http://tms-dev.dj.com',
+        target: 'http://tms-uat.dj.com/api',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api/common': '/common'
+        }
+      },
       '/api': {
         // target: 'http://tms-dev.dj.com',
         target: 'https://www.easy-mock.com/mock/5d3a603a47bd1943d2334eef/waybill',

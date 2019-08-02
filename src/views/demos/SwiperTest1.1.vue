@@ -51,7 +51,7 @@ export default {
           // },
           // 下拉释放刷新
           touchEnd: (e) => {
-            console.log('e515', e)
+            // console.log('e515', e)
             var _viewHeight = document.getElementsByClassName('swiper-wrapper')[0].offsetHeight
             var _contentHeight = document.getElementsByClassName('swiper-slide')[0].offsetHeight
             const context = this
@@ -61,7 +61,7 @@ export default {
             if (swiper.translate <= _viewHeight - _contentHeight - 50 && swiper.translate < 0) {
               swiper.allowTouchMove = false // 禁止触摸
               swiper.params.virtualTranslate = true // 定住不给回弹
-              // console.log("已经到达底部！");
+              // // console.log("已经到达底部！");
 
               // if (loadFlag) {
               //   context.loadMoreText = '正在加载...'

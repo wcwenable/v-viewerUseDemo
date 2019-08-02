@@ -36,7 +36,7 @@ export default {
       this.isNeedHideUpload = newVal
     },
     handleOnExceed (files, fileList) {
-      console.log('handleOnExceed (files, fileList515', files, fileList)
+      // console.log('handleOnExceed (files, fileList515', files, fileList)
       this.$message.warning(`您选择了${files.length}张图片，超过了单次上传限制(${this.MAXFILESNUM}张)！`)
     }
   }

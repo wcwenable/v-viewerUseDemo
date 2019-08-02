@@ -20,10 +20,8 @@
           </div>
           <div class="data-list">
             <el-row>
-              <el-col :span="6" v-for="item in ocrRecognizeRecords" :key="item.ocrRecognizeRecordId">
-                <div class="grid-content bg-purple">
-                  <recognize-small-picture class="data-list-item" :currentOcrRecognizeRecordId="currentOcrRecognizeRecordId" :recognizeRecord="item" @onSmallPictureDelete="handleRecognizeRecordDelete" @onSmallPictureClick="handleShowPreview"></recognize-small-picture>
-                </div>
+              <el-col :span="6" v-for="item in ocrRecognizeRecords" :key="item.ocrRecognizeRecordId"  class="dataListItem">
+                <recognize-small-picture :currentOcrRecognizeRecordId="currentOcrRecognizeRecordId" :recognizeRecord="item" @onSmallPictureDelete="handleRecognizeRecordDelete" @onSmallPictureClick="handleShowPreview"></recognize-small-picture>
               </el-col>
             </el-row>
           </div>
@@ -54,6 +52,9 @@ import PullDown from '@better-scroll/pull-down'
 import ScrollBar from '@better-scroll/scroll-bar'
 import MouseWheel from '@better-scroll/mouse-wheel'
 import Pullup from '@better-scroll/pull-up'
+import {
+  Promise
+} from 'q'
 BScroll.use(Pullup)
 BScroll.use(MouseWheel)
 BScroll.use(ScrollBar)
@@ -63,6 +64,14 @@ const TIME_STOP = 600
 const THRESHOLD = 0
 const STOP = 56
 export default {
+  props: {
+    uploadFiles: {
+      type: Array,
+      default () {
+        return []
+      }
+    }
+  },
   components: {
     RecognizePictureFullPreview,
     RecognizeSmallPicture
@@ -76,7 +85,17 @@ export default {
       ocrRecognizeListObj: null,
       dataList: [],
       isShowPreview: false,
-      currentOcrRecognizeRecordId: null
+      currentOcrRecognizeRecordId: null,
+      currentUploadFiles: []
+    }
+  },
+  watch: {
+    uploadFiles: {
+      deep: true,
+      handler: function (newVal) {
+        this.currentUploadFiles = this.deepClone(newVal) || []
+        this.prependUploadFiles()
+      }
     }
   },
   created () {
@@ -96,11 +115,25 @@ export default {
   },
   methods: {
     handleRecognizeRecordDelete (recognizeRecord) {
-      console.log('handleRecognizeRecordDelete (recognizeRecord515', recognizeRecord)
-      this.$message.warning('删除图片识别记录here!')
+      // console.log('handleRecognizeRecordDelete (recognizeRecord515', recognizeRecord)
+      this.$confirm('是否删除此图片?', '系统提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
     handleOcrRecognizeListObjChange (newVal) {
-      console.log('handleOcrRecognizeListObjChange (newVal515', newVal)
+      // console.log('handleOcrRecognizeListObjChange (newVal515', newVal)
       this.ocrRecognizeListObj = newVal && this.$refs.recognizePictureFullPreview.deepClone(newVal)
       this.currentOcrRecognizeRecordId = this.getCurrentOcrRecognizeRecordId
     },
@@ -108,28 +141,66 @@ export default {
       this.isShowPreview = false
       this.$emit('onToggleFullPreview', false)
     },
-    handleShowPreview (ocrRecognizeRecord) {
-      console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
+    handleShowPreview (ocrRecognizeRecord, isValid) {
+      // console.log('handleShowPreview (ocrRecognizeRecord515', ocrRecognizeRecord)
       this.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
-      this.isShowPreview = true
+      if (isValid) {
+        this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecord.ocrRecognizeRecordId
+        this.isShowPreview = true
+      }
       this.$emit('onToggleFullPreview', true)
     },
     // mode: 0(下拉刷新)，1（上拉加载）
     refreshDataList (mode = 1) {
-      return this.$http.post('/api/getOcrRecognizeList').then(res => {
-        mode === 0 && (this.dataList = [])
-        console.log('getOcrRecognizeList> res515', res, res.data.data)
-        this.ocrRecognizeListObj = res.data && res.data.data
-        if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
-          const ocrRecognizeRecordId = this.ocrRecognizeListObj.records[0].ocrRecognizeRecordId
-          this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecordId
-          this.currentOcrRecognizeRecordId = ocrRecognizeRecordId
-          this.dataList = this.dataList.concat(this.ocrRecognizeListObj.records)
-          this.ocrRecognizeListObj.records = this.dataList
-          this.ocrRecognizeListObj.total = this.dataList.length
-        }
+      return new Promise((resolve, reject) => {
+        resolve({
+          code: 0,
+          data: {
+            data: {
+              current: 1,
+              pageSize: 10,
+              pages: 1,
+              records: [{
+                ocrRecognizeRecordId: `0orrId`,
+                ocrTemplateId: this.currentOcrTemplateId,
+                picUrl: require('@/assets/logo.png'),
+                name: 'ceshi文件名',
+                type: 'image/png',
+                file: {},
+                bizStatus: 2
+              }],
+              size: 50,
+              total: 4
+            }
+          }
+        })
       })
+      // return this.$http.post('/api/getOcrRecognizeList')
+        .then(res => {
+          mode === 0 && (this.dataList = [])
+          // console.log('getOcrRecognizeList> res515', res, res.data.data)
+          this.ocrRecognizeListObj = res.data && res.data.data
+          if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
+            // const ocrRecognizeRecordId = this.ocrRecognizeListObj.records[0].ocrRecognizeRecordId
+            // this.ocrRecognizeListObj.currentOcrRecognizeRecordId = ocrRecognizeRecordId
+            // this.currentOcrRecognizeRecordId = ocrRecognizeRecordId
+            this.dataList = this.dataList.concat(this.ocrRecognizeListObj.records)
+            this.prependUploadFiles()
+          }
+        })
+    },
+    prependUploadFiles () {
+      if (this.ocrRecognizeListObj) {
+        this.dataList = []
+        const recognizeRecords = this.deepClone(this.ocrRecognizeListObj.records)
+        const pureRecognizeRecords = this.getPureDataList(recognizeRecords)
+        this.dataList = this.currentUploadFiles.concat(pureRecognizeRecords)
+        this.ocrRecognizeListObj.records = this.dataList
+        this.ocrRecognizeListObj.total = this.dataList.length
+      }
+    },
+    getPureDataList (records) {
+      return records.filter(rec => rec.uploadStatus === undefined)
     },
     initBscroll () {
       this.bscroll = new BScroll(this.$refs.bsWrapper, {
@@ -154,7 +225,7 @@ export default {
       this.bscroll.on('scroll', this.scrollHandler)
     },
     scrollHandler (pos) {
-      console.log(pos.y)
+      // console.log(pos.y)
     },
     async pullingUpHandler () {
       this.beforePullUp = false
@@ -196,6 +267,9 @@ export default {
         this.beforePullDown = true
         this.bscroll.refresh()
       }, TIME_BOUNCE)
+    },
+    deepClone (obj) {
+      return JSON.parse(JSON.stringify(obj))
     }
   }
 }
@@ -212,7 +286,7 @@ export default {
     position: relative;
     height: 100%;
     padding: 0 10px;
-    border:1px solid rgba(232,232,232,1);
+    border: 1px solid rgba(232, 232, 232, 1);
     overflow: hidden;
   }
   .data-list {
@@ -220,7 +294,7 @@ export default {
     min-height: 650px;
     height: 100%;
   }
-  .data-list-item {
+  .dataListItem {
     padding: 10px 0;
     list-style: none; // border-bottom: 1px solid #ccc;
   }

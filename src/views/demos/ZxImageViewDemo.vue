@@ -81,7 +81,7 @@ export default {
   methods: {
     ZxImageView,
     handleImageClick (e) {
-      console.log('handleImageClick (e515', e)
+      // console.log('handleImageClick (e515', e)
       const target = e.target
       if (target.nodeName === 'IMG') {
         // 获取图片索引

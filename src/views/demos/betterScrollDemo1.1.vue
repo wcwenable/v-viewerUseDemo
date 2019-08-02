@@ -75,7 +75,7 @@ export default {
         probeType: 3 // listening scroll hook
       })
       this._registerHooks(['scroll', 'scrollEnd'], (pos) => {
-        console.log('done')
+        // console.log('done')
       })
       this._registerHooks(['pullingUp'], this.pullingUpHandler)
     },
@@ -92,7 +92,7 @@ export default {
         this.emojis.push(newData)
       } catch (err) {
         // handle err
-        console.log(err)
+        // console.log(err)
       }
     },
     ajaxGet (/* url */) {

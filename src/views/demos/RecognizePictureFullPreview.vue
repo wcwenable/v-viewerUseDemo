@@ -3,7 +3,7 @@
     <el-row class="zeroPaddingMargin">
       <el-col :span="23">
         <div class="grid-content bg-purple">
-          <viewer ref="viewer" @inited="inited" :images="currentImages" style="height: 450px;">
+          <viewer ref="viewer" @inited="inited" :options="viewerOptions" :images="currentImages" style="height: 450px;">
             <div v-for="item in currentImages" :key="item.ocrRecognizeRecordId">
               <img :src="item.picUrl" height="100">
             </div>
@@ -76,7 +76,54 @@ export default {
         scaleX: 1,
         scaleY: 1
       },
-      currentViewer: null
+      currentViewer: null,
+      viewerOptions: {
+        'inline': true,
+        'button': false, // 右上角按钮
+        'navbar': false, // 底部缩略图
+        'title': false, // 当前图片标题
+        'toolbar': false, // 底部工具栏
+        'tooltip': true, // 显示缩放百分比
+        'movable': true, // 是否可以移动
+        'zoomable': true, // 是否可以缩放
+        'rotatable': true, // 是否可旋转
+        'scalable': false, // 是否可翻转
+        'transition': true, // 使用 CSS3 过度
+        'fullscreen': false, // 播放时是否全屏
+        'keyboard': false, // 是否支持键盘
+        'url': 'data-source',
+        ready: function (e) {
+          // console.log(e.type, '组件以初始化')
+        },
+        show: function (e) {
+          // console.log(e.type, '图片显示开始')
+        },
+        shown: function (e) {
+          // console.log(e.type, '图片显示结束')
+        },
+        hide: function (e) {
+          // console.log(e.type, '图片隐藏完成')
+        },
+        hidden: function (e) {
+          // console.log(e.type, '图片隐藏结束')
+        },
+        view: function (e) {
+          // console.log(e.type, '视图开始')
+        },
+        viewed: function (e) {
+          // console.log(e.type, '视图结束')
+          // 索引为 1 的图片旋转20度
+          if (e.detail.index === 1) {
+            this.viewer.rotate(20)
+          }
+        },
+        zoom: function (e) {
+          // console.log(e.type, '图片缩放开始')
+        },
+        zoomed: function (e) {
+          // console.log(e.type, '图片缩放结束')
+        }
+      }
     }
   },
   watch: {
@@ -113,7 +160,7 @@ export default {
     }
   },
   mounted () {
-    console.log('this.ocrRecognizeListObj515', this.ocrRecognizeListObj, this.currentOcrRecognizeRecords)
+    // console.log('this.ocrRecognizeListObj515', this.ocrRecognizeListObj, this.currentOcrRecognizeRecords)
   },
   methods: {
     isUploadWaiting (recognizeRecord) {
@@ -169,10 +216,10 @@ export default {
 </script>
 
 <style lang="scss">
-.fullPreviewContainer {
-  height: 100%;
-  width: 100%;
-}
+  .fullPreviewContainer {
+    height: 100%;
+    width: 100%;
+  }
   .zeroPaddingMargin {
     padding: 0;
     margin: 0;

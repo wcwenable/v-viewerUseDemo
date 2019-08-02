@@ -35,7 +35,7 @@ export default {
         stop: 40
       }
     })
-    console.log('this.scroll515', this.scroll)
+    // console.log('this.scroll515', this.scroll)
     this.scroll.on('pullingDown', () => {
       this.loadData()
       // this.scroll.refresh()
@@ -45,7 +45,7 @@ export default {
   methods: {
     loadData () {
       this.$http.post('/api/getOcrRecognizeList').then(res => {
-        console.log('getOcrRecognizeList> res515', res, res.data.data)
+        // console.log('getOcrRecognizeList> res515', res, res.data.data)
         this.ocrRecognizeListObj = res.data && res.data.data
         if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {
           this.data = this.ocrRecognizeListObj.records.concat(this.data)
