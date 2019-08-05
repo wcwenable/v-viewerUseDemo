@@ -44,7 +44,7 @@ export default {
   computed: {},
   methods: {
     loadData () {
-      this.$http.post('/api/getOcrRecognizeList').then(res => {
+      this.$http.post('/api/ocrRecognizeRecord/findOcrInfoByTempId').then(res => {
         // console.log('getOcrRecognizeList> res515', res, res.data.data)
         this.ocrRecognizeListObj = res.data && res.data.data
         if (this.ocrRecognizeListObj && this.ocrRecognizeListObj.records && this.ocrRecognizeListObj.records.length) {

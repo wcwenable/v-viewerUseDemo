@@ -1,32 +1,27 @@
 <template>
   <div>
-    <el-row>
-      <el-col :span="12">
-        <el-upload :disabled="isNeedHideUpload" :headers="{ Authorization: authorization}" drag action="" :show-file-list="false" multiple :http-request="handleUploadManually" :before-upload="beforeImageUpload">
-          <div class="el-upload__tip" slot="tip"></div>
-          <div slot="trigger" :class="triggerClass">
-            <img src="@/assets/ocr/upload@2x.png">
-            <div class="el-upload__text uploadDesc">您可以拖拽上传也可以选择<em>本地文件</em><br>支持JPG/PNG格式，大小4M以内</div>
-          </div>
-        </el-upload>
-        <div v-if="uploadErrList.length > 0" class="uploadErr">
-          <el-alert title="以下文件上传失败" type="error" @close="handleErrAlertClose" effect="dark">
-            <ul>
-              <li class="errli" v-for="(err, index) in uploadErrList" :key="index">{{err}}</li>
-            </ul>
-          </el-alert>
-        </div>
-        <recognize-situation-list :uploadFiles="uploadFiles" @onToggleFullPreview="handleToggleFullPreview" ref="recognizeSituationList"></recognize-situation-list>
-      </el-col>
-      <el-col :span="12">
-        <div class="grid-content bg-purple-light">4324234</div>
-      </el-col>
-    </el-row>
+    <el-upload :disabled="isNeedHideUpload" :headers="{ Authorization: authorization}" drag action="" :show-file-list="false" multiple :http-request="handleUploadManually" :before-upload="beforeImageUpload">
+      <div class="el-upload__tip" slot="tip"></div>
+      <div slot="trigger" :class="triggerClass">
+        <img src="@/assets/ocr/upload@2x.png">
+        <div class="el-upload__text uploadDesc">您可以拖拽上传也可以选择<em>本地文件</em><br>支持JPG/PNG格式，大小4M以内</div>
+      </div>
+    </el-upload>
+    <div v-if="uploadErrList.length > 0" class="uploadErr">
+      <el-alert title="以下文件上传失败" type="error" @close="handleErrAlertClose" effect="dark">
+        <ul>
+          <li class="errli" v-for="(err, index) in uploadErrList" :key="index">{{err}}</li>
+        </ul>
+      </el-alert>
+    </div>
+    <recognize-situation-list :uploadFiles="uploadFiles" @onToggleFullPreview="handleToggleFullPreview" ref="recognizeSituationList"></recognize-situation-list>
   </div>
 </template>
 
 <script>
-import { compress } from '@/views/common/utils'
+import {
+  compress
+} from '@/views/common/utils'
 import RecognizeSituationList from '@/views/demos/RecognizeSituationList'
 import localforage from 'localforage'
 export default {
@@ -76,15 +71,10 @@ export default {
       const isValidSize = file.size <= 1 * 1024 * 1024
       const isValidType = ['image/png', 'image/jpeg'].includes(file.type)
       let errDesc = `文件【${file.name}】:`
-
       !isValidSize && (errDesc = `${errDesc}超过了4M！`)
-
       !isValidType && (errDesc = `${errDesc}不受支持的图片格式！`)
-
       const isValid = isValidSize && isValidType
-
       !isValid && this.uploadErrList.push(errDesc)
-
       return isValid
     },
     async handleUploadManually (file) {
@@ -129,38 +119,34 @@ export default {
         fileToUpload.uploadStatus = 1
         fileToUpload.isUploadWaiting = true
         this.handleCompressFile(fileToUpload)
-        // this.$http.post('/api/common/v1/uploadFile', formData).then(res => {
-        //   fileToUpload.picUrl = res.data.data
-        //   fileToUpload.uploadStatus = 2
-        //   fileToUpload.isUploadWaiting = true
-        //   fileToUpload.bizStatus = 1
-        //   fileToUpload.recognizeStatus = 1
-        //   // console.log('v1/uploadFile>res515', res)
-        // })
       }
     },
     // 图片预览
     handleCompressFile (file) {
-      const isLt10M = file.file.size / 1024 / 1024 < 1.5
+      const copiedFile = Object.assign({}, file)
+      const isLt10M = copiedFile.file.size / 1024 / 1024 < 1.5
       if (!isLt10M) {
         this.$message.error('上传图片大小不能超过 10M!')
         return false
       } else {
         // this.dialogImageUrl = URL.createObjectURL(file.raw)
-        compress(file.file, val => {
+
+        compress(copiedFile.file, val => {
           ((context, file, val) => {
+            const compressFile = new File([val], file.name, { type: file.type, lastModified: file.file.lastModified })
             const formData = new FormData()
-            formData.append('file', val)
+            formData.append('file', compressFile)
             formData.append('type', file.type)
-            const uploadFile = context.uploadFiles.find(f => f.name === file.name)
             context.$http.post('/api/common/v1/uploadFile', formData).then(res => {
+              const uploadFile = context.uploadFiles.find(f => f.name === file.name)
               uploadFile.picUrl = res.data.data
               uploadFile.uploadStatus = 2
               uploadFile.isUploadWaiting = true
               uploadFile.bizStatus = 1
               uploadFile.recognizeStatus = 1
+              context.$message.warning('调用图片识别接口here!')
             })
-          })(this, file, val)
+          })(this, copiedFile, val)
         })
       }
     },
@@ -192,7 +178,8 @@ export default {
         this.setCachedUploadFiles(currentCachedFiles)
       }
       this.uploadFiles.forEach(file => {
-        this.submitUploadFileRequest(file)
+        const copiedFile = Object.assign({}, file)
+        this.submitUploadFileRequest(copiedFile)
       })
     }
   }

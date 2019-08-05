@@ -152,30 +152,30 @@ export default {
     },
     // mode: 0(下拉刷新)，1（上拉加载）
     refreshDataList (mode = 1) {
-      return new Promise((resolve, reject) => {
-        resolve({
-          code: 0,
-          data: {
-            data: {
-              current: 1,
-              pageSize: 10,
-              pages: 1,
-              records: [{
-                ocrRecognizeRecordId: `0orrId`,
-                ocrTemplateId: this.currentOcrTemplateId,
-                picUrl: require('@/assets/logo.png'),
-                name: 'ceshi文件名',
-                type: 'image/png',
-                file: {},
-                bizStatus: 2
-              }],
-              size: 50,
-              total: 4
-            }
-          }
-        })
-      })
-      // return this.$http.post('/api/getOcrRecognizeList')
+      // return new Promise((resolve, reject) => {
+      //   resolve({
+      //     code: 0,
+      //     data: {
+      //       data: {
+      //         current: 1,
+      //         pageSize: 10,
+      //         pages: 1,
+      //         records: [{
+      //           ocrRecognizeRecordId: `0orrId`,
+      //           ocrTemplateId: this.currentOcrTemplateId,
+      //           picUrl: require('@/assets/logo.png'),
+      //           name: 'ceshi文件名',
+      //           type: 'image/png',
+      //           file: {},
+      //           bizStatus: 2
+      //         }],
+      //         size: 50,
+      //         total: 4
+      //       }
+      //     }
+      //   })
+      // })
+      return this.$http.post('/api/ocrRecognizeRecord/findOcrInfoByTempId')
         .then(res => {
           mode === 0 && (this.dataList = [])
           // console.log('getOcrRecognizeList> res515', res, res.data.data)

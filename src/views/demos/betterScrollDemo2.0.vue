@@ -84,7 +84,7 @@ export default {
           mode: 0(下拉刷新)，1（上拉加载）
         */
     refreshDataList (mode = 1) {
-      return this.$http.post('/api/getOcrRecognizeList').then(res => {
+      return this.$http.post('/api/ocrRecognizeRecord/findOcrInfoByTempId').then(res => {
         mode === 0 && (this.dataList = [])
         // console.log('getOcrRecognizeList> res515', res, res.data.data)
         this.ocrRecognizeListObj = res.data && res.data.data
